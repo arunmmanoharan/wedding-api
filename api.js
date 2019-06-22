@@ -74,5 +74,7 @@ app.post('/content', (req, res) => {
 
 });
 
-
-app.listen(4000);
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+	console.log('Express server listening on port', port)
+});
