@@ -58,11 +58,16 @@ app.get('/video', (req, res) => {
 	}
 });
 
-app.get('/content', (req, res) => {
+app.post('/content', (req, res) => {
+
+	const itemsPerPage = req.body.itemsPerPage;
+	const nextCursor = req.body.nextCursor ? req.body.nextCursor : '';
 
 	cloudinary.api.resources({
 		type: 'upload',
 		prefix: 'Wedding/',
+		max_results: itemsPerPage,
+		next_cursor: nextCursor
 	}, (error, result) => {
 		res.send(result);
 	});
