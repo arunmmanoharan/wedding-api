@@ -3,7 +3,7 @@ const readline = require('linebyline');
 const {google} = require('googleapis');
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/drive.readonly', 'https://www.googleapis.com/auth/drive.metadata.readonly']
+const SCOPES = ['https://www.googleapis.com/auth/drive.readonly', 'https://www.googleapis.com/auth/drive.metadata.readonly'];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
@@ -14,6 +14,7 @@ fs.readFile('credentials.json', (err, content) => {
 	if (err) return console.log('Error loading client secret file:', err);
 	// Authorize a client with credentials, then call the Google Drive API.
 	authorize(JSON.parse(content), downloadFile);
+	authorize(JSON.parse(content), downloadImages);
 });
 
 /**
@@ -78,7 +79,7 @@ function downloadFile(auth) {
 		{
 			responseType: 'stream'
 		},
-		function(err, res){
+		function (err, res) {
 			res.data
 				.on('end', () => {
 					console.log('Done');
@@ -88,5 +89,41 @@ function downloadFile(auth) {
 				})
 				.pipe(dest);
 		}
-	)
+	);
+}
+
+function downloadImages(auth) {
+	const drive = google.drive({version: 'v3', auth});
+	drive.files.list({
+		auth,
+		folderId: '1bWjwwA3rWJLu3awXe2iTgC7fh2siPaQL',
+		q: 'mimeType contains \'image\' and trashed = false'
+	}, function (error, response) {
+		if (error) {
+			return console.log('ERROR', error);
+		}
+
+		response.data.files.forEach(function (item) {
+			console.log(item);
+			var file = fs.createWriteStream('./images/' + item.name);
+			file.on('finish', function () {
+			});
+
+
+			drive.files.get({
+				auth,
+				fileId: item.id,
+				alt: 'media'
+			},function (err, res) {
+				res.data
+					.on('end', () => {
+						console.log('Done');
+					})
+					.on('error', err => {
+						console.log('Error', err);
+					})
+					.pipe(file);
+			})
+		});
+	});
 }
