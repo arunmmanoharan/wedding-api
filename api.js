@@ -27,15 +27,11 @@ app.get('/', (req, res) => {
 	res.end();
 });
 
-app.get('/video', (req, res, fn, contentType) => {
-
-	contentType = contentType || "text/html";
-
+app.get('/video', (req, res) => {
 	const path = './wedding.mp4';
 	const stat = fs.statSync(path);
 	const fileSize = stat.size;
-	const range = req.headers.range || '';
-
+	const range = req.headers.range;
 	if (range) {
 		const parts = range.replace(/bytes=/, '').split('-');
 		const start = parseInt(parts[0], 10);
@@ -48,15 +44,14 @@ app.get('/video', (req, res, fn, contentType) => {
 			'Content-Range': `bytes ${start}-${end}/${fileSize}`,
 			'Accept-Ranges': 'bytes',
 			'Content-Length': chunkSize,
-			'Content-Type': contentType,
+			'Content-Type': 'video/mp4',
 		};
 		res.writeHead(206, head);
 		file.pipe(res);
 	} else {
 		const head = {
-			'Accept-Ranges': 'bytes',
 			'Content-Length': fileSize,
-			"Content-Type": contentType
+			'Content-Type': 'video/mp4',
 		};
 		res.writeHead(200, head);
 		fs.createReadStream(path).pipe(res);
