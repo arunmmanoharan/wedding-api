@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
 
 app.get('/video', (req, res, fn, contentType) => {
 
-	contentType = contentType || "text/html";
+	contentType = contentType || 'video/mp4';
 
 	const path = './wedding.mp4';
 	const stat = fs.statSync(path);
